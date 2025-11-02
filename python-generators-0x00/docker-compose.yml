@@ -1,0 +1,15 @@
+services:
+  mysql:
+    image: mysql:8.4.7
+    container_name: alx-mysql
+    env_file:
+      - .env
+    ports:
+      - "3309:3306"
+    volumes:
+      - alx-mysql-data:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf:ro
+    restart: unless-stopped
+
+volumes:
+  alx-mysql-data:
