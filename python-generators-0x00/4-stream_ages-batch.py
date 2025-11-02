@@ -17,10 +17,12 @@ AgeType = Union[int, float, Decimal]
 # -------------------------------
 
 
-def stream_user_ages() -> Generator[list[AgeType], None, None]:
+def stream_user_ages(batch_size: int = 100) -> Generator[list[AgeType], None, None]:
     """
-    Yield user ages one by one.
+    Yield user ages one by one from the database in batches.
 
+    Args:
+        batch_size: number of rows to fetch per batch
     """
     connection = None
     cursor = None
@@ -29,19 +31,23 @@ def stream_user_ages() -> Generator[list[AgeType], None, None]:
         if connection:
             cursor = connection.cursor()
 
-            cursor.execute(
-                "SELECT age FROM user_data"
-            )
-            batch = cursor.fetchall()
+            offset = 0
+            while True:
+                cursor.execute(
+                    "SELECT age FROM user_data LIMIT %s OFFSET %s",
+                    (batch_size, offset),
+                )
+                batch = cursor.fetchmany(batch_size)
 
-            if not batch:
-                raise ValueError("No age data in user_data database")
+                if not batch:
+                    break
 
-            # Efficiently extract ages in batch since there are a list of single values in tuple
-            batch = list(map(itemgetter(0), batch))
-            batch = cast(List[AgeType], batch)  # Telling the type checker
+                # Efficiently extract ages in batch since there are a list of single values in tuple
+                batch = list(map(itemgetter(0), batch))
+                batch = cast(List[AgeType], batch)  # Telling the type checker
 
-            yield batch
+                yield batch
+                offset += batch_size
 
     finally:
         if connection and cursor:
@@ -53,19 +59,23 @@ def stream_user_ages() -> Generator[list[AgeType], None, None]:
 # -------------------------------
 
 
-def calculate_average_age() -> float:
+def calculate_average_age(batch_size: int = 100) -> float:
     """
     Calculate average age of users using a generator.
 
+    Args:
+        batch_size: number of rows to fetch per batch
 
     Returns:
         Average age
     """
     total_age = 0
     count = 0
-    for age in stream_user_ages():
-        total_age += int(sum(age))
-        count += len(age)
+    for ages in stream_user_ages(batch_size):
+        n = len(ages)
+        ages_sum = sum(ages)
+        total_age += int(ages_sum)
+        count += n
     return total_age / count if count > 0 else 0.0
 
 
@@ -73,5 +83,5 @@ def calculate_average_age() -> float:
 # Example usage
 # -------------------------------
 if __name__ == "__main__":
-    average_age = calculate_average_age()
+    average_age = calculate_average_age(batch_size=10)
     print(f"Average age of users: {average_age:.2f}")
