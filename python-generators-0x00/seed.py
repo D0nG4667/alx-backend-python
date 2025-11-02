@@ -7,7 +7,7 @@ import os
 import mysql.connector
 import csv
 import uuid
-from dotenv import load_dotenv
+from sql_credentials import get_sql_credentials
 
 # -------------------------
 # Database Connection Setup
@@ -16,24 +16,10 @@ from dotenv import load_dotenv
 WD = os.path.dirname(os.path.abspath(__file__))
 
 
-def get_sql_credentials():
-    sql_env = load_dotenv(os.path.join(WD, '.env'))
-    print(sql_env)
-    host = os.getenv("HOST_DB")
-    user = os.getenv("MYSQL_ROOT_USER")
-    password = os.getenv("MYSQL_ROOT_PASSWORD")
-    port = os.getenv("HOST_PORT")
-    if not sql_env and not host:
-        raise ValueError(
-            "❌ .env file not found in the same folder as seep.py, or create env variables with HOST_DB, MYSQL_USER and MYSQL_ROOT_PASSWORD")
-    return host, user, password, port
-
-
-def connect_db(host=None, user=None, password=None, port=None):
+def connect_db():
     """Connect to MySQL server."""
     try:
-        if host is None:
-            host, user, password, port = get_sql_credentials()
+        host, user, password, port, _ = get_sql_credentials(WD)
         conn = mysql.connector.connect(
             host=host,
             user=user,
@@ -46,7 +32,7 @@ def connect_db(host=None, user=None, password=None, port=None):
         return None
 
 
-def create_database(connection, db_name="ALX_prodev"):
+def create_database(connection, db_name):
     """Create the database if it does not exist."""
     try:
         cursor = connection.cursor()
@@ -57,11 +43,10 @@ def create_database(connection, db_name="ALX_prodev"):
         print(f"❌ Failed creating database: {err}")
 
 
-def connect_to_prodev(host=None, user=None, password=None, port=None, db_name="ALX_prodev"):
+def connect_to_prodev():
     """Connect to the ALX_prodev database."""
     try:
-        if host is None:
-            host, user, password, port = get_sql_credentials()
+        host, user, password, port, db_name = get_sql_credentials(WD)
 
         conn = mysql.connector.connect(
             host=host,
@@ -156,7 +141,8 @@ def stream_rows(connection, batch_size=100):
 if __name__ == "__main__":
     conn = connect_db()
     if conn:
-        create_database(conn)
+        host, user, password, port, db_name = get_sql_credentials(WD)
+        create_database(conn, db_name)
         conn.close()
 
     conn = connect_to_prodev()
