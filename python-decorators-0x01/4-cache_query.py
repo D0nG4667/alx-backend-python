@@ -114,8 +114,12 @@ def fetch_users_with_cache(
 # Usage
 # -------------------------------
 if __name__ == "__main__":
+    # First call will cache the result
     users = fetch_users_with_cache(query="SELECT * FROM users")
+
+    # Second call will use the cached result
     users_again = fetch_users_with_cache(query="SELECT * FROM users")
+
     print(users_again)
 
 # Sample Output
