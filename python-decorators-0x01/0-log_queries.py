@@ -12,6 +12,7 @@ from datetime import datetime
 # Create a date-stamped folder name
 today_str = datetime.now().strftime("%Y-%m-%d")
 LOG_DIR = Path("logs") / today_str
+LOG_DIR.mkdir(exist_ok=True)
 
 LOG_FILE = LOG_DIR / "query.log"
 
