@@ -2,14 +2,16 @@ import sqlite3
 import functools
 import logging
 from pathlib import Path
+from datetime import datetime
 
 # -------------------------------
 # Configure logger
 # -------------------------------
 
 # Create logs directory if it doesn't exist
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
+# Create a date-stamped folder name
+today_str = datetime.now().strftime("%Y-%m-%d")
+LOG_DIR = Path("logs") / today_str
 
 LOG_FILE = LOG_DIR / "query.log"
 
@@ -55,6 +57,7 @@ def log_queries(func):
 # -------------------------------
 # Function using decorator
 # -------------------------------
+
 
 @log_queries
 def fetch_all_users(query):
