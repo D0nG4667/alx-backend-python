@@ -20,6 +20,8 @@ from datetime import datetime
 from typing import List
 from aiosqlite import Row  # a single DB row (tuple of columns)
 
+DB_PATH = Path("users.db")
+
 # -------------------------------
 # Configure logger
 # -------------------------------
@@ -42,7 +44,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-async def async_fetch_users(db_path: str = "users.db") -> List[Row]:
+async def async_fetch_users() -> List[Row]:
     """
     Asynchronously fetch all users from the database.
     Returns list of rows.
@@ -50,7 +52,7 @@ async def async_fetch_users(db_path: str = "users.db") -> List[Row]:
     logger.info("Starting async_fetch_users")
     rows: List[Row] = []
     try:
-        async with aiosqlite.connect(db_path) as db:
+        async with aiosqlite.connect(DB_PATH) as db:
             # return rows as tuples (default)
             async with db.execute("SELECT * FROM users") as cursor:
                 async for row in cursor:
@@ -62,17 +64,16 @@ async def async_fetch_users(db_path: str = "users.db") -> List[Row]:
     return rows
 
 
-async def async_fetch_older_users(
-    min_age: int = 40, db_path: str = "users.db"
-) -> List[Row]:
+async def async_fetch_older_users() -> List[Row]:
     """
     Asynchronously fetch users older than `min_age`.
     Returns list of rows.
     """
+    min_age: int = 40
     logger.info("Starting async_fetch_older_users (min_age=%d)", min_age)
     rows: List[Row] = []
     try:
-        async with aiosqlite.connect(db_path) as db:
+        async with aiosqlite.connect(DB_PATH) as db:
             async with db.execute(
                 "SELECT * FROM users WHERE age > ?", (min_age,)
             ) as cursor:
@@ -92,7 +93,7 @@ async def fetch_concurrently() -> None:
     logger.info("Running queries concurrently with asyncio.gather")
     # run both coroutines concurrently
     users_task = async_fetch_users()
-    older_users_task = async_fetch_older_users(min_age=40)
+    older_users_task = async_fetch_older_users()
 
     try:
         users, older_users = await asyncio.gather(users_task, older_users_task)
