@@ -167,7 +167,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        """Start patching requests.get and configure side_effect to return fixture payloads."""
+        """Start patching requests.get and configure side_effect
+        to return fixture payloads."""
         cls.get_patcher = patch("requests.get")
         mock_get = cls.get_patcher.start()
 
@@ -187,13 +188,15 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher.stop()
 
     def test_public_repos(self) -> None:
-        """Test that public_repos returns expected repo names from fixture payload."""
+        """Test that public_repos returns expected repo names
+        from fixture payload."""
         client = GithubOrgClient("testorg")
         result = client.public_repos()
         self.assertEqual(result, self.expected_repos)
 
     def test_public_repos_with_license(self) -> None:
-        """Test that public_repos filters repos by 'apache-2.0' license using fixture payload."""
+        """Test that public_repos filters repos by 'apache-2.0'
+        license using fixture payload."""
         client = GithubOrgClient("testorg")
         result = client.public_repos(license="apache-2.0")
         self.assertEqual(result, self.apache2_repos)
