@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'django_mysql',
     # Local apps
     'chats',
-    'users',
 ]
 
 MIDDLEWARE = [
@@ -165,7 +164,7 @@ REST_FRAMEWORK = {
 }
 
 # Auth Model
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'chats.User'
 
 
 # CORS settings
