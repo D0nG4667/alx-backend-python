@@ -11,7 +11,7 @@ from typing import Any, Dict, Tuple
 from utils.utils import access_nested_map
 from unittest import TestCase
 from unittest.mock import patch, Mock
-from utils.utils import get_json
+from utils.utils import get_json, memoize
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -102,6 +102,47 @@ class TestGetJson(TestCase):
 
             # Verify the returned result matches the expected payload
             self.assertEqual(result, test_payload)
+
+
+"""
+Unit tests for the `memoize` decorator in utils.py.
+
+This test ensures that decorated methods cache their results and avoid redundant computations.
+"""
+
+
+class TestMemoize(unittest.TestCase):
+    """Test suite for the `memoize` decorator."""
+
+    def test_memoize(self) -> None:
+        """
+        Test that a memoized method is called only once, even when accessed multiple times.
+
+        This verifies that the `memoize` decorator caches the result of the first call
+        and reuses it on subsequent accesses without re-invoking the original method.
+        """
+
+        class TestClass:
+            def a_method(self) -> int:
+                """Simulated expensive computation."""
+                return 42
+
+            @memoize
+            def a_property(self) -> int:
+                """Memoized property that delegates to a_method."""
+                return self.a_method()
+
+        test_obj = TestClass()
+
+        with patch.object(TestClass, "a_method", return_value=42) as mock_a:
+            # First access should invoke a_method
+            first = test_obj.a_property
+            # Second access should return cached result without calling a_method again
+            second = test_obj.a_property
+
+            self.assertEqual(first, 42)
+            self.assertEqual(second, 42)
+            mock_a.assert_called_once()
 
 
 # How to Run
