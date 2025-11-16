@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Unit tests for validating nested dictionary access via the access_nested_map utility.
+"""Unit tests for validating nested dictionary access
+via the access_nested_map utility.
 
-This module ensures that the access_nested_map function correctly traverses nested
-dictionaries using a sequence of keys, returning the expected value or structure.
+This module ensures that the access_nested_map function
+correctly traverses nested
+dictionaries using a sequence of keys, returning the
+expected value or structure.
 """
 
 import unittest
@@ -15,10 +18,13 @@ from utils.utils import access_nested_map, get_json, memoize
 
 
 class TestAccessNestedMap(unittest.TestCase):
-    """Structured test suite for access_nested_map, verifying key-path resolution in nested mappings.
+    """Structured test suite for access_nested_map, verifying
+    key-path resolution in nested mappings.
 
-    These tests confirm that the utility behaves predictably across varying depths of nested
-    dictionaries, ensuring robust access logic for both intermediate and terminal values.
+    These tests confirm that the utility behaves predictably across
+    varying depths of nested
+    dictionaries, ensuring robust access logic for both intermediate
+    and terminal values.
     """
 
     @parameterized.expand(
@@ -31,15 +37,19 @@ class TestAccessNestedMap(unittest.TestCase):
     def test_access_nested_map(
         self, nested_map: Dict[str, Any], path: Tuple[str, ...], expected: Any
     ) -> None:
-        """Assert that access_nested_map returns the correct value for a given key path.
+        """Assert that access_nested_map returns the correct value
+        for a given key path.
 
         Args:
             nested_map (Dict[str, Any]): The dictionary to traverse.
-            path (Tuple[str, ...]): A sequence of keys representing the access path.
-            expected (Any): The expected value retrieved from the nested structure.
+            path (Tuple[str, ...]): A sequence of keys representing
+            the access path.
+            expected (Any): The expected value retrieved from the
+            nested structure.
 
         Raises:
-            AssertionError: If the returned value does not match the expected result.
+            AssertionError: If the returned value does not match
+            the expected result.
         """
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
@@ -63,7 +73,8 @@ class TestAccessNestedMap(unittest.TestCase):
 """
 Unit tests for the `utils.get_json` function.
 
-This module tests that `get_json` correctly retrieves and returns JSON data
+This module tests that `get_json` correctly retrieves 
+and returns JSON data
 from a given URL using mocked HTTP GET requests.
 """
 
@@ -81,11 +92,13 @@ class TestGetJson(TestCase):
         self, test_url: str, test_payload: Dict[str, Any]
     ) -> None:
         """
-        Test that `get_json` returns the expected payload from a mocked HTTP GET request.
+        Test that `get_json` returns the expected payload from
+        a mocked HTTP GET request.
 
         Args:
             test_url (str): The URL to fetch JSON from.
-            test_payload (Dict[str, Any]): The expected JSON payload to be returned.
+            test_payload (Dict[str, Any]): The expected JSON payload
+            to be returned.
         """
 
         with patch("utils.utils.requests.get") as mock_get:
@@ -97,7 +110,8 @@ class TestGetJson(TestCase):
             # Call the function under test
             result = get_json(test_url)
 
-            # Ensure requests.get was called exactly once with the correct URL
+            # Ensure requests.get was called exactly once
+            # with the correct URL
             mock_get.assert_called_once_with(test_url)
 
             # Verify the returned result matches the expected payload
@@ -107,7 +121,8 @@ class TestGetJson(TestCase):
 """
 Unit tests for the `memoize` decorator in utils.py.
 
-This test ensures that decorated methods cache their results and avoid redundant computations.
+This test ensures that decorated methods cache 
+their results and avoid redundant computations.
 """
 
 
@@ -116,10 +131,13 @@ class TestMemoize(unittest.TestCase):
 
     def test_memoize(self) -> None:
         """
-        Test that a memoized method is called only once, even when accessed multiple times.
+        Test that a memoized method is called only once,
+        even when accessed multiple times.
 
-        This verifies that the `memoize` decorator caches the result of the first call
-        and reuses it on subsequent accesses without re-invoking the original method.
+        This verifies that the `memoize` decorator caches
+        the result of the first call
+        and reuses it on subsequent accesses without
+        re-invoking the original method.
         """
 
         class TestClass:
@@ -137,7 +155,8 @@ class TestMemoize(unittest.TestCase):
         with patch.object(TestClass, "a_method", return_value=42) as mock_a:
             # First access should invoke a_method
             first = test_obj.a_property
-            # Second access should return cached result without calling a_method again
+            # Second access should return cached result
+            # without calling a_method again
             second = test_obj.a_property
 
             self.assertEqual(first, 42)
