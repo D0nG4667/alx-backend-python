@@ -33,7 +33,7 @@ class TestGithubOrgClient(unittest.TestCase):
         Unit test for the `GithubOrgClient.org` property.
 
         Verifies that the client correctly delegates to `get_json` and
-        return the expected organization payload. Ensures that 
+        return the expected organization payload. Ensures that
         the external API call is made exactly once with the correct URL.
 
         Args:
