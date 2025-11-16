@@ -11,7 +11,7 @@ from typing import Any, Dict, Tuple
 from utils.utils import access_nested_map
 from unittest import TestCase
 from unittest.mock import patch, Mock
-from utils import get_json
+from utils.utils import get_json
 
 
 class TestAccessNestedMap(unittest.TestCase):
@@ -87,7 +87,8 @@ class TestGetJson(TestCase):
             test_url (str): The URL to fetch JSON from.
             test_payload (Dict[str, Any]): The expected JSON payload to be returned.
         """
-        with patch("utils.get_json.requests.get") as mock_get:
+
+        with patch("utils.utils.requests.get") as mock_get:
             # Create a mock response object with a .json() method
             mock_response = Mock()
             mock_response.json.return_value = test_payload
