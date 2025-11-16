@@ -19,12 +19,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy dependency files first (for caching)
-COPY pyproject.toml uvlock /app/
+COPY pyproject.toml uv.lock /app/
 
 # Install dependencies only (no project code yet)
 # Install dependencies
 RUN --mount=type=cache,target=/root/.cache/uv \
-    # --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --locked --no-install-project    
 
