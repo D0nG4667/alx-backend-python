@@ -20,11 +20,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Initialize environ and read .env (if present)
 env = environ.Env(
     DEBUG=(bool, False),
-    DJANGO_ALLOWED_HOSTS=(list, ["127.0.0.1", "localhost"]),
+    DJANGO_ALLOWED_HOSTS=(list, ['127.0.0.1', 'localhost']),
 )
 
 # read .env file if it exists
-environ.Env.read_env(BASE_DIR / ".env")
+environ.Env.read_env(BASE_DIR / '.env')
+
+# local
+environ.Env.read_env(BASE_DIR / '.env.local')
 
 
 # Quick-start development settings - unsuitable for production
@@ -32,74 +35,75 @@ environ.Env.read_env(BASE_DIR / ".env")
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env(
-    "SECRET_KEY",
-    default="django-insecure-da*$3$=*c$@(#r1!$$!6n*%^y&jrjxz4-9^)impb-9dg1gbzl@",
+    'SECRET_KEY',
+    default='django-insecure-da*$3$=*c$@(#r1!$$!6n*%^y&jrjxz4-9^)impb-9dg1gbzl@',
 )
-DEBUG = env("DEBUG")
-ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS")
+DEBUG = env('DEBUG')
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS')
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
     # Third-party
-    "rest_framework",
-    "corsheaders",
-    "drf_yasg",
-    "django_mysql",
+    'rest_framework',
+    'corsheaders',
+    'drf_yasg',
+    'django_mysql',
     # Local apps
-    "chats.apps.chatsConfig",
+    'chats',
+    'users',
 ]
 
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",  # must be high in the stack
-    "django.middleware.security.SecurityMiddleware",
-    "django.contrib.sessions.middleware.SessionMiddleware",
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',  # must be high in the stack
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = "messaging_app.urls"
+ROOT_URLCONF = 'messaging_app.urls'
 
 TEMPLATES = [
     {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = "messaging_app.wsgi.application"
+WSGI_APPLICATION = 'messaging_app.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": env.str("MYSQL_DATABASE", default="ALX_prodev"),
-        "USER": env.str("MYSQL_USER", default="root"),
-        "PASSWORD": env.str("MYSQL_PASSWORD", default="rootpassword"),
-        "HOST": env.str("MYSQL_HOST", default="127.0.0.1"),
-        "PORT": env.str("MYSQL_PORT", default="3306"),
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': env.str('MYSQL_DATABASE', default='ALX_prodev'),
+        'USER': env.str('MYSQL_USER', default='root'),
+        'PASSWORD': env.str('MYSQL_PASSWORD', default='rootpassword'),
+        'HOST': env.str('MYSQL_HOST', default='127.0.0.1'),
+        'PORT': env.str('MYSQL_PORT', default='3306'),
     }
 }
 
@@ -109,16 +113,16 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
 
@@ -126,9 +130,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = env.str("TIME_ZONE", default="UTC")
+TIME_ZONE = env.str('TIME_ZONE', default='UTC')
 
 USE_I18N = True
 
@@ -138,49 +142,53 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = "static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # REST Framework settings (customize as needed)
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.IsAuthenticated",
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
     ],
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ],
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 20,
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
 
+# Auth Model
+AUTH_USER_MODEL = 'users.User'
+
+
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = env.bool("CORS_ALLOW_ALL_ORIGINS")
+CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS')
 # or whitelist
 # CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
 
 # drf-yasg (Swagger) settings
 SWAGGER_SETTINGS = {
-    "USE_SESSION_AUTH": True,
-    "SECURITY_DEFINITIONS": {"basic": {"type": "basic"}},
+    'USE_SESSION_AUTH': True,
+    'SECURITY_DEFINITIONS': {'basic': {'type': 'basic'}},
 }
 
 # Celery config (example)
 CELERY_BROKER_URL = env(
-    "CELERY_BROKER_URL", default="amqp://guest:guest@localhost:5672//"
+    'CELERY_BROKER_URL', default='amqp://guest:guest@localhost:5672//'
 )  # RabbitMQ
-CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="rpc://")
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='rpc://')
 
 # Logging (simple console logging)
 LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {"console": {"class": "logging.StreamHandler"}},
-    "root": {"handlers": ["console"], "level": "INFO"},
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'console': {'class': 'logging.StreamHandler'}},
+    'root': {'handlers': ['console'], 'level': 'INFO'},
 }

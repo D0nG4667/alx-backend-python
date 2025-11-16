@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import include, path, re_path
+from django.urls import path, re_path
 from drf_yasg import openapi
 
 # drf-yasg
@@ -35,7 +35,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include("chats.urls")),  # chats app urls here
+    # path("api/", include("chats.urls")),  # chats app urls here
     # swagger / redoc
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
