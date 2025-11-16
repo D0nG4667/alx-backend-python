@@ -11,10 +11,11 @@ making real HTTP calls.
 
 import unittest
 from typing import Dict, List
-from unittest.mock import PropertyMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 from parameterized import parameterized
 from utils.client import GithubOrgClient
+from utils.fixtures import TEST_PAYLOAD
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -68,7 +69,8 @@ class TestGithubOrgClient(unittest.TestCase):
     @patch("utils.client.get_json")
     def test_public_repos(self, mock_get_json) -> None:
         """
-        Test that `public_repos` returns the expected list of repository names.
+        Test that `public_repos` returns the expected list of
+        repository names.
 
         This test mocks:
         - `get_json` to return a known list of repo dictionaries
@@ -103,7 +105,6 @@ class TestGithubOrgClient(unittest.TestCase):
             mock_repos_url.assert_called_once()
             mock_repos_url.assert_called_once()
 
-
     @parameterized.expand(
         [
             ({"license": {"key": "my_license"}}, "my_license", True),
@@ -114,7 +115,8 @@ class TestGithubOrgClient(unittest.TestCase):
         self, repo: Dict[str, Dict[str, str]], license_key: str, expected: bool
     ) -> None:
         """
-        Test that `has_license` correctly checks if a repo has the specified license.
+        Test that `has_license` correctly checks if a repo has the
+        specified license.
 
         Args:
             repo (dict): A dictionary representing a GitHub repository.
@@ -123,3 +125,62 @@ class TestGithubOrgClient(unittest.TestCase):
         """
         result = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(result, expected)
+
+
+"""
+Integration tests for GithubOrgClient.public_repos using fixtures
+and patched requests.get.
+"""
+
+
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """
+    Integration test suite for GithubOrgClient.public_repos.
+
+    This class uses fixture-based mocking to simulate GitHub API responses.
+    Only external HTTP calls are mocked; internal logic is tested end-to-end.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Start patching requests.get and configure side_effect 
+        to return fixture payloads."""
+        (
+            cls.org_payload,
+            cls.repos_payload,
+            cls.expected_repos,
+            cls.apache2_repos,
+        ) = TEST_PAYLOAD[0]
+
+        cls.get_patcher = patch("requests.get")
+        mock_get = cls.get_patcher.start()
+
+        def side_effect(url, *args, **kwargs):
+            response = MagicMock()
+            if url.endswith("/repos"):
+                response.json.return_value = cls.repos_payload
+            else:
+                response.json.return_value = cls.org_payload
+            return response
+
+        mock_get.side_effect = side_effect
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        """Stop the requests.get patcher."""
+        cls.get_patcher.stop()
+
+    def test_public_repos(self) -> None:
+        """Test that public_repos returns expected repo names 
+        from fixture payload."""
+        client = GithubOrgClient("testorg")
+        result = client.public_repos()
+        self.assertEqual(result, self.expected_repos)
+
+    def test_public_repos_with_license(self) -> None:
+        """Test that public_repos filters repos by 'apache-2.0' 
+        license using fixture payload."""
+        client = GithubOrgClient("testorg")
+        result = client.public_repos(license="apache-2.0")
+        self.assertEqual(result, self.apache2_repos)
+        self.assertEqual(result, self.apache2_repos)
