@@ -3,6 +3,8 @@ from .models import User, Conversation, Message
 
 
 class UserSerializer(serializers.ModelSerializer):
+    email = serializers.CharField()  # Explicit CharField usage
+
     class Meta:
         model = User
         fields = [
@@ -34,7 +36,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
 class ConversationSerializer(serializers.ModelSerializer):
     participants = UserSerializer(many=True, read_only=True)
-    messages = MessageSerializer(many=True, read_only=True, source='messages')
+    messages = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
@@ -44,3 +46,14 @@ class ConversationSerializer(serializers.ModelSerializer):
             'created_at',
             'messages',
         ]
+
+    def get_messages(self, obj):
+        messages = obj.messages.all()
+        return MessageSerializer(messages, many=True).data
+
+    def validate(self, attrs):
+        if not attrs.get('participants'):
+            raise serializers.ValidationError(
+                'Conversation must include at least one participant.'
+            )
+        return attrs
