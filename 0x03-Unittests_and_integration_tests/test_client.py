@@ -102,3 +102,24 @@ class TestGithubOrgClient(unittest.TestCase):
             )
             mock_repos_url.assert_called_once()
             mock_repos_url.assert_called_once()
+
+
+    @parameterized.expand(
+        [
+            ({"license": {"key": "my_license"}}, "my_license", True),
+            ({"license": {"key": "other_license"}}, "my_license", False),
+        ]
+    )
+    def test_has_license(
+        self, repo: Dict[str, Dict[str, str]], license_key: str, expected: bool
+    ) -> None:
+        """
+        Test that `has_license` correctly checks if a repo has the specified license.
+
+        Args:
+            repo (dict): A dictionary representing a GitHub repository.
+            license_key (str): The license key to check for.
+            expected (bool): Expected result of the license check.
+        """
+        result = GithubOrgClient.has_license(repo, license_key)
+        self.assertEqual(result, expected)
