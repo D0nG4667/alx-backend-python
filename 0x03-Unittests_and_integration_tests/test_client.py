@@ -29,6 +29,21 @@ class TestGithubOrgClient(unittest.TestCase):
     )
     @patch("utils.client.get_json")
     def test_org(self, org_name: str, mock_get_json) -> None:
+        """
+        Unit test for the `GithubOrgClient.org` property.
+
+        Verifies that the client correctly delegates to `get_json` and
+        return the expected organization payload. Ensures that the external API call
+        is made exactly once with the correct URL.
+
+        Args:
+            org_name (str): The name of the GitHub organization to test.
+            mock_get_json (MagicMock): Mocked version of `get_json`.
+
+        Asserts:
+            - `get_json` is called once with the correct URL.
+            - The returned value matches the expected mock payload.
+        """
         expected = {"org": org_name}
         mock_get_json.return_value = expected
 
@@ -143,7 +158,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        """Start patching requests.get and configure side_effect 
+        """Start patching requests.get and configure side_effect
         to return fixture payloads."""
         (
             cls.org_payload,
@@ -171,15 +186,17 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher.stop()
 
     def test_public_repos(self) -> None:
-        """Test that public_repos returns expected repo names 
+        """Test that public_repos returns expected repo names
         from fixture payload."""
         client = GithubOrgClient("testorg")
         result = client.public_repos()
         self.assertEqual(result, self.expected_repos)
 
     def test_public_repos_with_license(self) -> None:
-        """Test that public_repos filters repos by 'apache-2.0' 
-        license using fixture payload."""
+        """
+        Test that public_repos filters repos by 'apache-2.0'
+        license using fixture payload.
+        """
         client = GithubOrgClient("testorg")
         result = client.public_repos(license="apache-2.0")
         self.assertEqual(result, self.apache2_repos)
