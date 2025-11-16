@@ -13,7 +13,7 @@ import unittest
 from typing import Dict, List
 from unittest.mock import MagicMock, PropertyMock, patch
 
-from parameterized import parameterized
+from parameterized import parameterized, parameterized_class
 from utils.client import GithubOrgClient
 from utils.fixtures import TEST_PAYLOAD
 
@@ -27,8 +27,8 @@ class TestGithubOrgClient(unittest.TestCase):
             ({"license": {"key": "other_license"}}, "my_license", False),
         ]
     )
-    def test_has_license(self, repo: Dict[str, Dict[str, str]], 
-        license_key: str, expected: bool
+    def test_has_license(
+        self, repo: Dict[str, Dict[str, str]], license_key: str, expected: bool
     ):
         """
         Test that `has_license` correctly checks if a repo has the
@@ -148,25 +148,26 @@ and patched requests.get.
 """
 
 
+@parameterized_class(
+    [
+        {
+            "org_payload": TEST_PAYLOAD[0][0],
+            "repos_payload": TEST_PAYLOAD[0][1],
+            "expected_repos": TEST_PAYLOAD[0][2],
+            "apache2_repos": TEST_PAYLOAD[0][3],
+        }
+    ]
+)
 class TestIntegrationGithubOrgClient(unittest.TestCase):
     """
     Integration test suite for GithubOrgClient.public_repos.
 
-    This class uses fixture-based mocking to simulate GitHub API responses.
-    Only external HTTP calls are mocked; internal logic is tested end-to-end.
+    Only external requests are mocked. Internal logic is tested end-to-end.
     """
 
     @classmethod
     def setUpClass(cls) -> None:
-        """Start patching requests.get and configure side_effect
-        to return fixture payloads."""
-        (
-            cls.org_payload,
-            cls.repos_payload,
-            cls.expected_repos,
-            cls.apache2_repos,
-        ) = TEST_PAYLOAD[0]
-
+        """Start patching requests.get and configure side_effect to return fixture payloads."""
         cls.get_patcher = patch("requests.get")
         mock_get = cls.get_patcher.start()
 
@@ -186,18 +187,13 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher.stop()
 
     def test_public_repos(self) -> None:
-        """Test that public_repos returns expected repo names
-        from fixture payload."""
+        """Test that public_repos returns expected repo names from fixture payload."""
         client = GithubOrgClient("testorg")
         result = client.public_repos()
         self.assertEqual(result, self.expected_repos)
 
     def test_public_repos_with_license(self) -> None:
-        """
-        Test that public_repos filters repos by 'apache-2.0'
-        license using fixture payload.
-        """
+        """Test that public_repos filters repos by 'apache-2.0' license using fixture payload."""
         client = GithubOrgClient("testorg")
         result = client.public_repos(license="apache-2.0")
         self.assertEqual(result, self.apache2_repos)
-
