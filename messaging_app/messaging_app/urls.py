@@ -31,8 +31,8 @@ urlpatterns = [
     path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('api/', include('chats.urls')),
-    path('api/', include('chats.urls')),  # chats app urls here
-    path('api/token/', obtain_auth_token),  # 🔐 Token login endpoint
+    path('api-auth/', include('rest_framework.urls')),  # ✅ browsable API login/logout
+    path('api/token/', obtain_auth_token),  # ✅ token-based authentication
     # swagger / redoc
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path(
