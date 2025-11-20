@@ -54,7 +54,7 @@ class TestAccessNestedMap(unittest.TestCase):
         self.assertEqual(access_nested_map(nested_map, path), expected)
 
     # 🧪 Parameterized test for exception handling in access_nested_map
-    # Validates that a KeyError is raised when accessing 
+    # Validates that a KeyError is raised when accessing
     # missing keys in nested maps.
     # Ensures the exception message matches the final key in the path.
 
@@ -73,7 +73,7 @@ class TestAccessNestedMap(unittest.TestCase):
 
 """
 Unit tests for the `utils.get_json` function.
-This module tests that `get_json` correctly retrieves 
+This module tests that `get_json` correctly retrieves
 and returns JSON data
 from a given URL using mocked HTTP GET requests.
 """
@@ -120,7 +120,7 @@ class TestGetJson(TestCase):
 
 """
 Unit tests for the `memoize` decorator in utils.py.
-This test ensures that decorated methods cache 
+This test ensures that decorated methods cache
 their results and avoid redundant computations.
 """
 
