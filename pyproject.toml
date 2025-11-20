@@ -31,3 +31,6 @@ arg-type-hints-in-signature = true
 arg-type-hints-in-docstring = false
 check-return-types = false
 check-class-attributes = false
+
+[tool.uv.workspace]
+exclude = ["messaging_app"]
