@@ -5,6 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
 from .permissions import IsOwner  # custom permission
+from .permissions import IsParticipantOfConversation
+from .pagination import StandardResultsSetPagination
 
 
 class ConversationViewSet(viewsets.ModelViewSet):
@@ -18,7 +20,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
     ]
     ordering_fields = ['created_at']
 
-    def get_queryset(self): # type: ignore
+    def get_queryset(self):  # type: ignore
         """
         Restrict conversations to those where the current user is a participant.
         """
@@ -50,8 +52,14 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [
+        django_filters.rest_framework.DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+    filterset_class = MessageFilter
     search_fields = ['message_body', 'sender__email', 'recipient__email']
     ordering_fields = ['sent_at']
 
