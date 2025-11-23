@@ -71,6 +71,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Custom middleware
+    'chats.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'messaging_app.urls'
@@ -101,10 +103,17 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': env.str('MYSQL_DATABASE', default='ALX_prodev'),
-        'USER': env.str('MYSQL_USER', default='root'),
-        'PASSWORD': env.str('MYSQL_PASSWORD', default='rootpassword'),
-        'HOST': env.str('MYSQL_HOST', default='127.0.0.1'),
+        'USER': env.str('MYSQL_USER', default='testuser'),
+        'PASSWORD': env.str('MYSQL_PASSWORD', default='strongpassword'),
+        'HOST': env.str(
+            'MYSQL_HOST', default='db'
+        ),  # docker-compose service name
         'PORT': env.str('MYSQL_PORT', default='3306'),
+        'TEST': {
+            'NAME': env.str(
+                'MYSQL_TEST_DB', default='test_alxmessaging'
+            ),  # explicit test DB name
+        },
     }
 }
 
@@ -203,13 +212,30 @@ CELERY_BROKER_URL = env(
 )  # RabbitMQ
 CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='rpc://')
 
-# Logging (simple console logging)
+# Logging (console and file logging)
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers': {'console': {'class': 'logging.StreamHandler'}},
-    'root': {'handlers': ['console'], 'level': 'INFO'},
+    'handlers': {
+        'requests_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': str(BASE_DIR / 'requests.log'),
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'requests_logger': {
+            'handlers': ['requests_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
 }
+
 
 # Swagger
 SPECTACULAR_SETTINGS = {

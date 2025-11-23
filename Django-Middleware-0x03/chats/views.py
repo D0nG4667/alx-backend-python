@@ -1,17 +1,22 @@
-from rest_framework import viewsets, status, filters
+from typing import Any
+from django.db.models import QuerySet
+from rest_framework.request import Request
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.serializers import Serializer
+from rest_framework import viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Q
+
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
-from .permissions import IsOwner  # custom permission
-from .permissions import IsParticipantOfConversation
+from .permissions import IsOwner, IsParticipantOfConversation
 from .pagination import StandardResultsSetPagination
 
 
-class ConversationViewSet(viewsets.ModelViewSet):
+class ConversationViewSet(viewsets.ModelViewSet[Conversation]):
     serializer_class = ConversationSerializer
-    permission_classes = [IsAuthenticated, IsOwner]
+    permission_classes = [IsOwner]
+    pagination_class = StandardResultsSetPagination
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = [
         'participants__email',
@@ -20,87 +25,68 @@ class ConversationViewSet(viewsets.ModelViewSet):
     ]
     ordering_fields = ['created_at']
 
-    def get_queryset(self):  # type: ignore
-        """
-        Restrict conversations to those where the current user is a participant.
-        """
+    def get_queryset(self) -> QuerySet[Conversation]:
+        """Restrict conversations to those where the current user is a participant."""
         return Conversation.objects.filter(participants=self.request.user)
 
-    def create(self, request, *args, **kwargs):
-        participant_ids = request.data.get('participants', [])
+    def perform_create(self, serializer: Serializer) -> None:
+        """Ensure the requesting user is always included in participants."""
+        participant_ids: list[int] = self.request.data.get('participants', [])
         if not participant_ids:
-            return Response(
-                {'error': 'Participants list is required.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValueError('Participants list is required.')
 
-        participants = User.objects.filter(id__in=participant_ids)
+        participants: QuerySet[User] = User.objects.filter(
+            id__in=participant_ids
+        )
         if not participants.exists():
-            return Response(
-                {'error': 'No valid participants found.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValueError('No valid participants found.')
 
-        # Ensure the requesting user is always included
-        conversation = Conversation.objects.create()
-        conversation.participants.set(list(participants) + [request.user])
-        conversation.save()
-
-        serializer = self.get_serializer(conversation)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        conversation: Conversation = serializer.save()
+        conversation.participants.set(
+            list(participants) + [self.request.user]
+        )
 
 
-class MessageViewSet(viewsets.ModelViewSet):
+class MessageViewSet(viewsets.ModelViewSet[Message]):
     serializer_class = MessageSerializer
-    permission_classes = [IsAuthenticated, IsParticipantOfConversation]
+    permission_classes = [IsParticipantOfConversation]
     pagination_class = StandardResultsSetPagination
     filter_backends = [
-        django_filters.rest_framework.DjangoFilterBackend,
+        DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
     ]
-    filterset_class = MessageFilter
+    filterset_class = Any  # replace with actual MessageFilter if imported
     search_fields = ['message_body', 'sender__email', 'recipient__email']
     ordering_fields = ['sent_at']
 
-    def get_queryset(self):  # type: ignore[override]
-        """
-        Restrict messages to those where the current user is sender or recipient.
-        """
-        user = self.request.user
-        return Message.objects.filter(sender=user) | Message.objects.filter(
-            recipient=user
-        )
+    def get_queryset(self) -> QuerySet[Message]:
+        """Restrict messages to those where the current user is sender or recipient."""
+        user: User = self.request.user
+        return Message.objects.filter(Q(sender=user) | Q(recipient=user))
 
-    def create(self, request, *args, **kwargs):
-        sender_id = request.data.get('sender')
-        recipient_id = request.data.get('recipient')
-        conversation_id = request.data.get('conversation')
-        message_body = request.data.get('message_body')
+    def perform_create(self, serializer: Serializer) -> None:
+        """Ensure the sender is the current user."""
+        sender_id: int | None = self.request.data.get('sender')
+        recipient_id: int | None = self.request.data.get('recipient')
+        conversation_id: int | None = self.request.data.get('conversation')
+        message_body: str | None = self.request.data.get('message_body')
 
         if not all([sender_id, recipient_id, conversation_id, message_body]):
-            return Response(
-                {'error': 'All fields are required.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            raise ValueError('All fields are required.')
 
-        sender = get_object_or_404(User, id=sender_id)
-        recipient = get_object_or_404(User, id=recipient_id)
-        conversation = get_object_or_404(Conversation, id=conversation_id)
+        sender: User = User.objects.get(id=sender_id)
+        recipient: User = User.objects.get(id=recipient_id)
+        conversation: Conversation = Conversation.objects.get(
+            id=conversation_id
+        )
 
-        # Ensure the sender is the current user
-        if sender != request.user:
-            return Response(
-                {'error': 'You can only send messages as yourself.'},
-                status=status.HTTP_403_FORBIDDEN,
-            )
+        if sender != self.request.user:
+            raise PermissionError('You can only send messages as yourself.')
 
-        message = Message.objects.create(
+        serializer.save(
             sender=sender,
             recipient=recipient,
             conversation=conversation,
             message_body=message_body,
         )
-
-        serializer = self.get_serializer(message)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)

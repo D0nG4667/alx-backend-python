@@ -1,0 +1,43 @@
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alxmessaging-test
+    command: pytest
+    env_file:
+      - .env.test   # separate env file for test credentials
+    environment:
+      MYSQL_DATABASE: test_alxmessaging
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: strongpassword
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+    volumes:
+      - ./messaging_app:/app/messaging_app
+      - ./chats:/app/chats
+      - ./manage.py:/app/manage.py
+      - ./requests.log:/app/requests.log   # ✅ mount only requests.log
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    container_name: alxmessaging-mysql-test
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - am_test_db_data:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3308:3306"   # avoid clashing with dev DB
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  am_test_db_data:

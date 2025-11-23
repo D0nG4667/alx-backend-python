@@ -14,6 +14,7 @@ services:
     volumes:
       - am_db_data:/var/lib/mysql
       - ./my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
       interval: 10s
@@ -47,6 +48,7 @@ services:
       - .env
     volumes:
       - ./messaging_app:/app/messaging_app
+      - ./chats:/app/chats
       - ./manage.py:/app/manage.py
       - am_static_volume:/usr/src/app/staticfiles
       - am_media_volume:/usr/src/app/mediafiles
