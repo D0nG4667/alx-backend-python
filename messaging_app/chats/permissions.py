@@ -1,6 +1,7 @@
-from rest_framework.permissions import BasePermission
+from rest_framework import permissions
 
-class IsOwner(BasePermission):
+
+class IsOwner(permissions.BasePermission):
     """
     Allow access only if the object belongs to the requesting user.
     """
