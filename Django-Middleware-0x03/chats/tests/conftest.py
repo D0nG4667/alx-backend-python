@@ -13,8 +13,10 @@ def clean_requests_log() -> Generator[None, None, None]:
     Fixture to ensure requests.log is cleaned before and after each test.
     """
     if LOG_FILE.exists():
-        LOG_FILE.write_text('')
+        # LOG_FILE.write_text('')
+        pass
     yield
     # Clean up after test run
-    if LOG_FILE.exists():
-        LOG_FILE.write_text('')
+    if LOG_FILE.exists():        
+        # LOG_FILE.write_text('')
+        pass

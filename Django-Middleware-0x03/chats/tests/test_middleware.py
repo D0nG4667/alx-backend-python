@@ -12,8 +12,8 @@ def test_request_logging_middleware() -> None:
     """
 
     # Clean up any existing log file
-    if LOG_FILE.exists():
-        LOG_FILE.write_text("")
+    # if LOG_FILE.exists():
+    #     LOG_FILE.write_text("")
 
     client = Client()
 

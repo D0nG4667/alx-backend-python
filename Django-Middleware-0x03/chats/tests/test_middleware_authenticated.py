@@ -15,8 +15,8 @@ def test_request_logging_authenticated_user() -> None:
     """
 
     # Clean up any existing log file
-    if LOG_FILE.exists():
-        LOG_FILE.write_text("")
+    # if LOG_FILE.exists():
+    #     LOG_FILE.write_text("")
 
     User = get_user_model()
     user = User.objects.create_user(
