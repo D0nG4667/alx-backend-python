@@ -124,3 +124,37 @@ class OffensiveLanguageMiddleware:
         if x_forwarded_for:
             return x_forwarded_for.split(',')[0].strip()
         return request.META.get('REMOTE_ADDR', '')
+
+
+class RolepermissionMiddleware:
+    """
+    Middleware to enforce role-based access control for chat actions.
+    Only users with role 'admin' or 'moderator' are allowed.
+    """
+
+    def __init__(
+        self, get_response: Callable[[HttpRequest], HttpResponse]
+    ) -> None:
+        self.get_response: Callable[[HttpRequest], HttpResponse] = (
+            get_response
+        )
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        # Skip if user is not authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse(
+                {'error': 'Authentication required'}, status=403
+            )
+
+        # Check user role (assuming `role` is a field on User model)
+        user_role: str | None = getattr(request.user, 'role', None)
+
+        if user_role not in ('admin', 'moderator'):
+            return JsonResponse(
+                {'error': 'Access denied. Admin or moderator role required.'},
+                status=403,
+            )
+
+        # Continue normal flow
+        response: HttpResponse = self.get_response(request)
+        return response
