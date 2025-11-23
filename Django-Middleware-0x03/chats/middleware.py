@@ -1,8 +1,8 @@
-import logging
 from datetime import datetime
+import logging
 from pathlib import Path
 from typing import Callable
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 
 
 class RequestLoggingMiddleware:
@@ -45,4 +45,29 @@ class RequestLoggingMiddleware:
 
         # Continue request/response cycle
         response: HttpResponse = self.get_response(request)
+        return response
+
+
+class RestrictAccessByTimeMiddleware:
+    """
+    Middleware to restrict chat access outside 6AM–9PM.
+    Returns 403 Forbidden if accessed outside allowed hours.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Current server time (24-hour format)
+        current_hour = datetime.now().hour
+
+        # Allowed hours: 6 <= hour < 21 (6AM–9PM)
+        if not (6 <= current_hour < 21):
+            return JsonResponse(
+                {'error': 'Chat access restricted outside 6AM–9PM'},
+                status=403,
+            )
+
+        # Continue normal request flow
+        response = self.get_response(request)
         return response
