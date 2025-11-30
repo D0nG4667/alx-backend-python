@@ -44,6 +44,31 @@ def send_message(request: HttpRequest) -> JsonResponse:
     )
 
 
+def build_thread(message: Message) -> dict:
+    """
+    Recursively build a threaded conversation starting from a given message.
+    Uses Message.objects.filter to fetch replies.
+    """
+
+    replies_qs = Message.objects.filter(
+        parent_message=message
+    ).select_related('sender', 'receiver')
+
+    replies = []
+    for reply in replies_qs:
+        replies.append(
+            {
+                'id': reply.id,
+                'sender': reply.sender.username,
+                'receiver': reply.receiver.username,
+                'content': reply.content,
+                'timestamp': reply.timestamp,
+                'replies': build_thread(reply),  # recursion
+            }
+        )
+    return replies  # type: ignore[attr-defined]
+
+
 @login_required
 def get_threaded_conversation(
     request: HttpRequest, message_id: int
@@ -53,11 +78,9 @@ def get_threaded_conversation(
     Uses select_related and prefetch_related for optimization.
     """
     try:
-        root_message = (
-            Message.objects.select_related('sender', 'receiver')
-            .prefetch_related('replies__sender', 'replies__receiver')
-            .get(pk=message_id)
-        )
+        root_message = Message.objects.select_related(
+            'sender', 'receiver'
+        ).get(pk=message_id)
     except Message.DoesNotExist:
         return JsonResponse({'error': 'Message not found'}, status=404)
 
@@ -67,7 +90,7 @@ def get_threaded_conversation(
         'receiver': root_message.receiver.username,
         'content': root_message.content,
         'timestamp': root_message.timestamp,
-        'replies': root_message.get_thread(),
+        'replies': build_thread(root_message),
     }
 
     return JsonResponse(conversation, status=200)
