@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.cache import cache_page
 from django.http import JsonResponse, HttpRequest
 from django.contrib.auth import get_user_model
 from .models import Message
@@ -115,3 +116,32 @@ def get_unread_messages(request: HttpRequest) -> JsonResponse:
     ]
 
     return JsonResponse({'unread_messages': messages}, status=200)
+
+
+@login_required
+@cache_page(60)  # <-- 60 seconds cache timeout
+def get_conversation_messages(
+    request: HttpRequest, conversation_id: int
+) -> JsonResponse:
+    """
+    View: Retrieve all messages in a conversation.
+    Cached for 60 seconds to reduce database hits.
+    """
+    messages_qs = (
+        Message.objects.filter(parent_message_id=conversation_id)
+        .select_related('sender', 'receiver')
+        .order_by('timestamp')
+    )
+
+    messages = [
+        {
+            'id': msg.id,
+            'sender': msg.sender.username,
+            'receiver': msg.receiver.username,
+            'content': msg.content,
+            'timestamp': msg.timestamp,
+        }
+        for msg in messages_qs
+    ]
+
+    return JsonResponse({'messages': messages}, status=200)
