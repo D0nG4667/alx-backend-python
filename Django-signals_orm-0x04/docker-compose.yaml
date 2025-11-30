@@ -1,0 +1,93 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: alxsignals-mysql
+    env_file:
+      - .env
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "3307:3306"
+    volumes:
+      - as_db_data:/var/lib/mysql
+      - ./my.cnf:/etc/mysql/conf.d/my.cnf:ro
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: alxsignals-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    volumes:
+      - as_rabbitmq_data:/var/lib/rabbitmq
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alxsignals-web
+    command: >
+      sh -c "uv run manage.py migrate --noinput &&
+             uv run manage.py collectstatic --noinput &&
+             uv run gunicorn messaging_app.wsgi:application --bind 0.0.0.0:8000"
+    expose:
+      - "8000"
+    env_file:
+      - .env
+    volumes:
+      - ./messaging_app:/app/messaging_app
+      - ./chats:/app/chats
+      - ./mesaging:/app/messaging
+      - ./manage.py:/app/manage.py
+      - as_static_volume:/usr/src/app/staticfiles
+      - as_media_volume:/usr/src/app/mediafiles
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    develop:
+      # Create a `watch` configuration to update the app
+      #
+      watch:
+        # Sync the working directory with the `/app` directory in the container
+        - action: sync
+          path: .
+          target: /app
+          # Exclude the project virtual environment
+          ignore:
+            - .venv/
+
+        # Rebuild the image on changes to the `pyproject.toml`
+        - action: rebuild
+          path: ./pyproject.toml
+    
+  nginx:
+    build: ./nginx
+    volumes:
+      - as_static_volume:/usr/src/app/staticfiles
+      - as_media_volume:/usr/src/app/mediafiles
+    ports:
+      - "8080:8000"   # guest:host
+    depends_on:
+      - web
+
+volumes:
+  as_db_data:
+  as_rabbitmq_data:
+  as_static_volume:
+  as_media_volume:

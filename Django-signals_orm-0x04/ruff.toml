@@ -1,0 +1,10 @@
+# Assume Python 3.12
+target-version = "py312"
+
+# Set the line length limit for formatting and linting.
+line-length = 78
+
+[format]
+# Like Django files, use single quotes for strings.
+quote-style = "single"
+
