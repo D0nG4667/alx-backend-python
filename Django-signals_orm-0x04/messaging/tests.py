@@ -1,6 +1,7 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from .models import Message, MessageHistory, Notification
+from django.urls import reverse
 
 User = get_user_model()
 
@@ -72,3 +73,63 @@ class MessageEditSignalTest(TestCase):
         if history is not None:
             self.assertEqual(history.old_content, 'Original content')
             self.assertTrue(self.message.edited)
+
+
+class DeleteUserSignalTest(TestCase):
+    def setUp(self) -> None:
+        # Create sender and receiver
+        self.sender = User.objects.create_user(
+            username='sender', email='sender@example.com', password='pass123'
+        )
+        self.receiver = User.objects.create_user(
+            username='receiver',
+            email='receiver@example.com',
+            password='pass123',
+        )
+
+        # Create a message
+        self.message = Message.objects.create(
+            sender=self.sender,
+            receiver=self.receiver,
+            content='Hello Receiver!',
+        )
+
+        # Create a notification for the receiver
+        self.notification = Notification.objects.create(
+            user=self.receiver, message=self.message
+        )
+
+        # Create a message history entry
+        self.history = MessageHistory.objects.create(
+            message=self.message,
+            old_content='Old content',
+            edited_by=self.sender,
+        )
+
+        # Client for simulating requests
+        self.client = Client()
+        self.client.login(username='sender', password='pass123')
+
+    def test_delete_user_cleans_related_data(self) -> None:
+        """
+        Deleting a user should remove their account and all related
+        messages, notifications, and histories.
+        """
+        response = self.client.get(reverse('delete_user'))
+        self.assertEqual(response.status_code, 200)
+
+        # Verify sender is deleted
+        self.assertFalse(User.objects.filter(username='sender').exists())
+
+        # Verify related messages are deleted
+        self.assertFalse(Message.objects.filter(sender=self.sender).exists())
+
+        # Verify related notifications are deleted
+        self.assertFalse(
+            Notification.objects.filter(user=self.receiver).exists()
+        )
+
+        # Verify related histories are deleted
+        self.assertFalse(
+            MessageHistory.objects.filter(message=self.message).exists()
+        )
