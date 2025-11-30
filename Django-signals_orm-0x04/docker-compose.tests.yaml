@@ -5,7 +5,11 @@ services:
       dockerfile: Dockerfile
     container_name: alxsignals-test
     # command: pytest
-    command: python manage.py test messaging.tests.NotificationSignalTest
+    command: >
+      sh -c "python manage.py makemigrations messaging --noinput &&
+             python manage.py test messaging.tests.NotificationSignalTest -v 2 &&
+             python manage.py test messaging.tests.MessageEditSignalTest -v 2 
+      "
     env_file:
       - .env.test   # separate env file for test credentials
     environment:
