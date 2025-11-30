@@ -115,7 +115,9 @@ class DeleteUserSignalTest(TestCase):
         Deleting a user should remove their account and all related
         messages, notifications, and histories.
         """
-        response = self.client.get(reverse('delete_user'))
+        self.client.force_login(self.sender)  # ensures authenticated
+
+        response = self.client.get(reverse('messages:delete_user'))
         self.assertEqual(response.status_code, 200)
 
         # Verify sender is deleted

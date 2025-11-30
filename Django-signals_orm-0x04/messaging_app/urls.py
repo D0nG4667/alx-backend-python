@@ -62,7 +62,7 @@ urlpatterns = [
     path('api/', api_home, name='api_home'),  # ✅ API home page
     path('api/v1/', api_v1_home, name='api_v1_home'),
     # Versioned endpoints
-    path('api/v1/messages/', include('chats.urls')),
+    path('api/v1/chats/', include('chats.urls')),
     path(
         'api/v1/auth/', include('rest_framework.urls')
     ),  # browsable API login/logout
@@ -78,5 +78,9 @@ urlpatterns = [
         'api/v1/redoc/',
         SpectacularRedocView.as_view(url_name='schema'),
         name='redoc',
+    ),
+    path(
+        'api/v1/messages/',
+        include(('messaging.urls', 'messages'), namespace='messages'),
     ),
 ]

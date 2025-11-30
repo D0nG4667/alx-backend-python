@@ -1,4 +1,5 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
 from typing import Any
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -25,6 +26,40 @@ class Message(models.Model):
         on_delete=models.SET_NULL,
         help_text='Tracks which user last edited the message',
     )
+    parent_message = models.ForeignKey(
+        'self',
+        related_name='replies',
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        help_text='Reference to the parent message if this is a reply',
+    )
+
+    if TYPE_CHECKING:
+        # Let type checkers know about reverse relation
+        replies: models.Manager['Message']
+
+    def get_thread(self):
+        """
+        Recursively fetch all replies to this message.
+        """
+        replies = []
+        for reply in (
+            self.replies.all()
+            .select_related('sender', 'receiver')
+            .prefetch_related('replies')
+        ):
+            replies.append(
+                {
+                    'id': reply.id,
+                    'sender': reply.sender.username,
+                    'receiver': reply.receiver.username,
+                    'content': reply.content,
+                    'timestamp': reply.timestamp,
+                    'replies': reply.get_thread(),
+                }
+            )
+        return replies
 
     def __str__(self) -> str:
         return f'Message from {self.sender} to {self.receiver}'
