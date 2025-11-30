@@ -24,7 +24,9 @@ def log_message_edit(sender: Any, instance: Message, **kwargs: Any) -> None:
         instance.edited = True
         # Save old content in history
         MessageHistory.objects.create(
-            message=instance, old_content=old_instance.content
+            message=instance,
+            old_content=old_instance.content,
+            edited_by=instance.edited_by,
         )
 
 
