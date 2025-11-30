@@ -94,3 +94,24 @@ def get_threaded_conversation(
     }
 
     return JsonResponse(conversation, status=200)
+
+
+@login_required
+def get_unread_messages(request: HttpRequest) -> JsonResponse:
+    """
+    View: Display unread messages in the user's inbox.
+    Uses custom manager with .only() optimization.
+    """
+    unread_qs = Message.unread.unread_for_user(request.user)
+
+    messages = [
+        {
+            'id': msg.id,
+            'sender': msg.sender.username,
+            'content': msg.content,
+            'timestamp': msg.timestamp,
+        }
+        for msg in unread_qs
+    ]
+
+    return JsonResponse({'unread_messages': messages}, status=200)

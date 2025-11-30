@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 from typing import Any
 from django.db import models
 from django.contrib.auth import get_user_model
+from .managers import UnreadMessagesManager
 
 User = get_user_model()
 
@@ -34,6 +35,10 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         help_text='Reference to the parent message if this is a reply',
     )
+    read = models.BooleanField(default=False)
+
+    # Attach custom manager
+    unread = UnreadMessagesManager()
 
     if TYPE_CHECKING:
         # Let type checkers know about reverse relation
