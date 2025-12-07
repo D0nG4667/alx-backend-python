@@ -18,5 +18,8 @@ COPY . /app/
 # Expose Django default port
 EXPOSE 8000
 
+# Reminder: run container with port mapping
+# Example: docker run -d -p 8000:8000 messaging_app:latest
+
 # Run the Django development server
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
