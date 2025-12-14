@@ -1,0 +1,28 @@
+#!/bin/bash
+# kubctl-0x03: Apply rolling update for Django messaging app
+
+set -e
+
+DEPLOYMENT="messaging-app-blue"
+SERVICE="messaging-app-service"
+NAMESPACE="default"
+
+echo "🚀 Applying updated deployment (image v2.0)..."
+kubectl apply -f messaging_app/blue_deployment.yaml
+
+echo "🔄 Monitoring rollout status..."
+kubectl rollout status deployment/$DEPLOYMENT -n $NAMESPACE
+
+echo "🌐 Testing app availability during rollout..."
+CLUSTER_IP=$(kubectl get svc $SERVICE -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
+PORT=$(kubectl get svc $SERVICE -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
+
+for i in {1..20}; do
+  curl -s http://$CLUSTER_IP:$PORT/ || echo "⚠️ Request failed"
+  sleep 2
+done
+
+echo "✅ Verifying pods after rollout..."
+kubectl get pods -l app=messaging-app,version=blue -n $NAMESPACE -o wide
+
+echo "🎯 Rolling update complete!"
