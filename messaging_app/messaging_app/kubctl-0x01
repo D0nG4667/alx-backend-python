@@ -1,0 +1,26 @@
+#!/bin/bash
+# kubctl-0x01: Scale Django app deployment and verify performance
+
+set -e
+
+DEPLOYMENT_NAME="messaging-app-deployment"
+SERVICE_NAME="messaging-app-service"
+NAMESPACE="default"
+
+echo "🚀 Scaling $DEPLOYMENT_NAME to 3 replicas..."
+kubectl scale deployment $DEPLOYMENT_NAME --replicas=3 -n $NAMESPACE
+
+echo "✅ Verifying pods..."
+kubectl get pods -n $NAMESPACE -o wide
+
+echo "📋 Checking resource usage..."
+kubectl top pods -n $NAMESPACE || echo "⚠️ Metrics server not installed. Install with: minikube addons enable metrics-server"
+
+# Get ClusterIP of the service
+CLUSTER_IP=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
+PORT=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
+
+echo "🌐 Running load test with wrk against http://$CLUSTER_IP:$PORT ..."
+wrk -t4 -c100 -d30s http://$CLUSTER_IP:$PORT || echo "⚠️ wrk must be installed locally to run load test"
+
+echo "🎯 Scaling and load testing complete!"
