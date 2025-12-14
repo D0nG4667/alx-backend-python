@@ -1,0 +1,19 @@
+#!/bin/bash
+# kubctl-0x02: Apply blue-green deployments and check logs
+
+set -e
+
+echo "🚀 Applying blue deployment..."
+kubectl apply -f messaging_app/blue_deployment.yaml
+
+echo "🚀 Applying green deployment..."
+kubectl apply -f messaging_app/green_deployment.yaml
+
+echo "✅ Deployments applied. Checking pods..."
+kubectl get pods -l app=messaging-app -o wide
+
+echo "📋 Checking logs for green deployment..."
+GREEN_POD=$(kubectl get pods -l app=messaging-app,version=green -o jsonpath='{.items[0].metadata.name}')
+kubectl logs $GREEN_POD || echo "⚠️ No logs yet for green pod"
+
+echo "🎯 Blue-Green deployment setup complete!"
