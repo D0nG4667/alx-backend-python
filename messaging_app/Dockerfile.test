@@ -1,0 +1,3 @@
+FROM messaging_app:latest AS test
+COPY pyproject.toml uv.lock /app/
+RUN uv sync --locked --all-extras --no-install-project

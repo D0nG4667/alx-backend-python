@@ -20,7 +20,7 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Production Docker Image') {
             steps {
                 sh '''
                 docker build -t messaging_app:latest -f messaging_app/Dockerfile messaging_app
@@ -28,10 +28,18 @@ pipeline {
             }
         }
 
+        stage('Build Docker image for testing') {
+            steps {
+                sh '''
+                docker build -t messaging_app:test -f messaging_app/Dockerfile.test messaging_app
+                '''
+            }
+        }
+
         stage('Run Tests in Container') {
             steps {
                 sh '''
-                docker run --rm -v $PWD:/app messaging_app:latest \
+                docker run --rm -v $PWD:/app messaging_app:test \
                     uv run pytest messaging_app --junitxml=reports/test-results.xml
                 '''
             }
