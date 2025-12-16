@@ -5,11 +5,12 @@ FROM messaging_app:latest AS test
 # Copy dependency manifests
 COPY pyproject.toml uv.lock /app/
 
-# Install dev dependencies (including pytest)
-RUN uv sync --locked --group dev
+# Install dev dependencies (including pytest) with cache mount
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --locked --group dev
 
 # Ensure executables in .venv/bin are available
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Default command runs pytest with JUnit XML report
-CMD ["uv", "run", "python", "-m", "pytest", "messaging_app", "--junitxml=reports/test-results.xml"]
+CMD ["uv", "run", "pytest", "messaging_app", "--junitxml=reports/test-results.xml"]
