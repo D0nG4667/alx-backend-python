@@ -17,8 +17,12 @@ dependencies = [
     "drf-spectacular-sidecar>=2025.10.1",
     "gunicorn>=23.0.0",
     "mysqlclient>=2.2.7",
-    "pytest>=9.0.2",
     "rabbitmq>=0.2.0",
     "ruff>=0.14.5",
     "sqlparse>=0.5.3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
 ]

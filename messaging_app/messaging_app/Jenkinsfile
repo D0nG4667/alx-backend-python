@@ -32,7 +32,7 @@ pipeline {
             steps {
                 sh '''
                 docker run --rm -v $PWD:/app messaging_app:latest \
-                    pytest messaging_app --junitxml=reports/test-results.xml
+                    uv run pytest messaging_app --junitxml=reports/test-results.xml
                 '''
             }
         }

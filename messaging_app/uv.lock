@@ -288,10 +288,14 @@ dependencies = [
     { name = "drf-spectacular-sidecar" },
     { name = "gunicorn" },
     { name = "mysqlclient" },
-    { name = "pytest" },
     { name = "rabbitmq" },
     { name = "ruff" },
     { name = "sqlparse" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "pytest" },
 ]
 
 [package.metadata]
@@ -308,11 +312,13 @@ requires-dist = [
     { name = "drf-spectacular-sidecar", specifier = ">=2025.10.1" },
     { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "mysqlclient", specifier = ">=2.2.7" },
-    { name = "pytest", specifier = ">=9.0.2" },
     { name = "rabbitmq", specifier = ">=0.2.0" },
     { name = "ruff", specifier = ">=0.14.5" },
     { name = "sqlparse", specifier = ">=0.5.3" },
 ]
+
+[package.metadata.requires-dev]
+dev = [{ name = "pytest", specifier = ">=9.0.2" }]
 
 [[package]]
 name = "mysqlclient"
