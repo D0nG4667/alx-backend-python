@@ -6,7 +6,7 @@ FROM messaging_app:latest AS test
 COPY pyproject.toml uv.lock /app/
 
 # Install dev dependencies (including pytest)
-RUN uv sync --locked --all-extras
+RUN uv sync --locked --group dev
 
 # Ensure executables in .venv/bin are available
 ENV PATH="/app/.venv/bin:$PATH"
