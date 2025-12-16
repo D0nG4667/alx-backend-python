@@ -1,0 +1,58 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/D0nG4667/alx-backend-python.git',
+                    credentialsId: 'dg-github-creds-id'
+            }
+        }
+
+        stage('Verify Docker Connection') {
+            steps {
+                sh '''
+                echo "Checking Docker connectivity..."
+                docker info
+                docker version
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                docker build -t messaging_app:latest -f messaging_app/Dockerfile messaging_app
+                '''
+            }
+        }
+
+        stage('Run Tests in Container') {
+            steps {
+                sh '''
+                docker run --rm -v $PWD:/app messaging_app:latest \
+                    pytest messaging_app --junitxml=reports/test-results.xml
+                '''
+            }
+        }
+
+        stage('Publish Report') {
+            steps {
+                junit 'reports/test-results.xml'
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'reports/test-results.xml', fingerprint: true
+        }
+        success {
+            echo '✅ Tests passed successfully!'
+        }
+        failure {
+            echo '❌ Tests failed. Check reports.'
+        }
+    }
+}
