@@ -1,3 +1,15 @@
+# ---- Stage 3: Test ----
+# Copy production image    
 FROM messaging_app:latest AS test
+
+# Copy dependency manifests
 COPY pyproject.toml uv.lock /app/
-RUN uv sync --locked --all-extras --no-install-project
+
+# Install dev dependencies (including pytest)
+RUN uv sync --locked --all-extras
+
+# Ensure executables in .venv/bin are available
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Default command runs pytest with JUnit XML report
+CMD ["uv", "run", "python", "-m", "pytest", "messaging_app", "--junitxml=reports/test-results.xml"]
