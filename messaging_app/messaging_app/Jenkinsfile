@@ -55,6 +55,7 @@ pipeline {
                 docker run --name messaging_app_test messaging_app:test || true
 
                 # Copy the JUnit XML report out of the container
+                mkdir -p reports || true
                 docker cp messaging_app_test:/tmp/test-results.xml reports/test-results.xml || true
 
                 # Remove the container after copying
