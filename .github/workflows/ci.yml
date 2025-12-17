@@ -8,7 +8,20 @@ on:
   workflow_call:   # makes this workflow reusable
 
 jobs:
+  lint:
+    name: Ruff Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Ruff lint
+        run: |
+          docker run --rm -v ${{ github.workspace }}:/apps ghcr.io/astral-sh/ruff:latest \
+            ruff check /apps/messaging_app  
+
   test:
+    name: Django Tests
     runs-on: ubuntu-latest
     defaults:
       run:
