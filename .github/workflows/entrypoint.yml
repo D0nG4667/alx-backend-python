@@ -8,4 +8,4 @@ on:
 
 jobs:
   messaging-app-ci:
-    uses: ./.github/workflows/messaging_app/ci.yml
+    uses: ./.github/workflows/ci.yml
