@@ -51,13 +51,21 @@ pipeline {
         stage('Run Tests in Container') {
             steps {
                 sh '''
-                docker run --rm messaging_app:test
+                # Run the test container with a fixed name
+                docker run --name messaging_app_test messaging_app:test || true
+
+                # Copy the JUnit XML report out of the container
+                docker cp messaging_app_test:/tmp/test-results.xml reports/test-results.xml || true
+
+                # Remove the container after copying
+                docker rm -f messaging_app_test || true
                 '''
             }
         }
 
         stage('Publish Report') {
             steps {
+                // Parse test results into Jenkins UI
                 junit 'reports/test-results.xml'
             }
         }
@@ -65,9 +73,6 @@ pipeline {
 
     post {
         always {
-            // Parse test results into Jenkins UI
-            junit 'messaging_app/reports/test-results.xml'
-
             // Archive raw XML for download and traceability
             archiveArtifacts artifacts: 'reports/test-results.xml', fingerprint: true
         }

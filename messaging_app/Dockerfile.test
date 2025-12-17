@@ -13,4 +13,4 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Default command runs pytest with JUnit XML report
-CMD ["uv", "run", "pytest", "messaging_app", "--junitxml=reports/test-results.xml"]
+CMD ["uv", "run", "pytest", "messaging_app", "--junitxml=/tmp/test-results.xml"]
