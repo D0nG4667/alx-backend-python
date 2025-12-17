@@ -23,7 +23,7 @@ jobs:
 
       - name: Set up Docker Compose
         run: |
-          docker compose -f docker-compose.yml up -d db rabbitmq
+          docker compose -f docker-compose.yaml up -d db rabbitmq
           # Wait for MySQL to be healthy
           until docker exec alxmessaging-mysql mysqladmin ping -h 127.0.0.1 -uroot -p${MYSQL_ROOT_PASSWORD} --silent; do
             echo "Waiting for MySQL..."
@@ -37,4 +37,4 @@ jobs:
 
       - name: Tear down
         if: always()
-        run: docker compose -f docker-compose.yml down -v
+        run: docker compose -f docker-compose.yaml down -v
