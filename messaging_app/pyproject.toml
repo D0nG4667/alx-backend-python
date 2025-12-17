@@ -28,5 +28,6 @@ dev = [
     "pytest>=9.0.2",
 ]
 
-[pytest]
-DJANGO_SETTINGS_MODULE = messaging_app.settings
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "messaging_app.settings"
+
