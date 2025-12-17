@@ -12,14 +12,14 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: messaging_app/messaging_app
+        working-directory: messaging_app
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Use CI env file
-        run: cp ../../.github/workflows/.env.ci .env
+        run: cp ../.github/workflows/.env.ci .env
 
       - name: Set up Docker Compose
         run: |
