@@ -28,6 +28,18 @@ pipeline {
             }
         }
 
+        // Legacy compliance stage: install via pip3 for checker
+        // stage('Install Dependencies (pip)') {
+        //     steps {
+        //         sh '''
+        //             python3 -m venv venv
+        //             . venv/bin/activate
+        //             pip3 install -r messaging_app/requirements.txt
+        //         '''
+        //     }
+        // }
+
+        // Modern workflow: build Docker test image with uv + baked source
         stage('Build Docker image for testing') {
             steps {
                 sh '''
@@ -53,6 +65,10 @@ pipeline {
 
     post {
         always {
+            // Parse test results into Jenkins UI
+            junit 'messaging_app/reports/test-results.xml'
+
+            // Archive raw XML for download and traceability
             archiveArtifacts artifacts: 'reports/test-results.xml', fingerprint: true
         }
         success {
