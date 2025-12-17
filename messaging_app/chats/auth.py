@@ -5,7 +5,7 @@ Custom authentication views for messaging_app using JWT (SimpleJWT).
 
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
-    TokenRefreshView,
+    # TokenRefreshView,
 )
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 

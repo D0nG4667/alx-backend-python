@@ -2,6 +2,8 @@ from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
+
+from messaging_app.chats.filters import MessageFilter
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
 from .permissions import IsOwner  # custom permission
@@ -55,7 +57,6 @@ class MessageViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsParticipantOfConversation]
     pagination_class = StandardResultsSetPagination
     filter_backends = [
-        django_filters.rest_framework.DjangoFilterBackend,
         filters.SearchFilter,
         filters.OrderingFilter,
     ]
