@@ -29,11 +29,14 @@ jobs:
             echo "Waiting for MySQL..."
             sleep 5
           done
+      
+      - name: Build web service
+        run: docker compose -f docker-compose.yml build web
 
       - name: Run tests inside web service
         run: |
           # Override the web service command to run pytest instead of Gunicorn
-          docker compose run --rm web pytest --ds=messaging_app.settings --junitxml=reports/test-results.xml
+          docker compose -f docker-compose.yml run --rm web pytest --ds=messaging_app.settings --junitxml=reports/test-results.xml
 
       - name: Tear down
         if: always()
